@@ -22,11 +22,12 @@ import java.util.Scanner;
  * It utilizes recursion to generate the strings, mergesort to sort them, and
  * binary search to find them in a dictionary.
  *
- * @author Zach Blick, [ADD YOUR NAME HERE]
+ * @author Zach Blick, [Eric Feng]
  *
  * Written on March 5, 2023 for CS2 @ Menlo School
  *
  * DO NOT MODIFY MAIN OR ANY OF THE METHOD HEADERS.
+ *
  */
 public class SpellingBee {
 
@@ -40,17 +41,85 @@ public class SpellingBee {
         words = new ArrayList<String>();
     }
 
-    // TODO: generate all possible substrings and permutations of the letters.
-    //  Store them all in the ArrayList words. Do this by calling ANOTHER method
-    //  that will find the substrings recursively.
+    // Generates all possible words and adds them to words
     public void generate() {
-        // YOUR CODE HERE — Call your recursive method!
+        makeWords(letters, "");
     }
 
-    // TODO: Apply mergesort to sort all words. Do this by calling ANOTHER method
-    //  that will find the substrings recursively.
+    public void makeWords(String makeLetters, String usedLetters){
+        if (makeLetters.isEmpty())
+        {
+            return;
+        }
+        for (int i = 0; i < makeLetters.length(); i++){
+            words.add(usedLetters);
+            makeWords(makeLetters.substring(0, i) + makeLetters.substring(i+1),
+                    usedLetters + makeLetters.substring(i, i+1));
+        }
+    }
+
+
+
+    //Sorts words by calling mergesort
     public void sort() {
         // YOUR CODE HERE
+        String[] merged = mergeSort(0, words.size()-1);
+        for (int i = 0; i < words.size(); i++)
+        {
+            words.set(i, merged[i]);
+        }
+    }
+
+    //Typical mergesort
+    public String[] mergeSort(int low, int high){
+        if (low == high){
+            String[] temp = new String[1];
+            temp[0] = words.get(low);
+            return temp;
+        }
+
+        int mid = (low + high) / 2;
+        String[] a = mergeSort(low, mid);
+        String[] b = mergeSort(mid + 1, high);
+
+        return merge(a,b);
+    }
+
+    public String[] merge(String[] i, String[] j){
+        String[] sorted = new String[i.length + j.length];
+        int a = 0;
+        int b = 0;
+        int c = 0;
+
+        while (a < i.length && b < j.length){
+            if((i[a].compareTo(j[b])) < 0){
+                sorted[c] = i[a];
+                a++;
+            }
+            else
+            {
+                sorted[c] = j[b];
+                b++;
+            }
+            c++;
+        }
+
+        if(a == i.length){
+            while (b < j.length){
+                sorted[c] = j[b];
+                b++;
+                c++;
+            }
+        }
+
+        if(b == j.length){
+            while (a < i.length){
+                sorted[c] = i[a];
+                a++;
+                c++;
+            }
+        }
+        return sorted;
     }
 
     // Removes duplicates from the sorted list.
@@ -65,10 +134,39 @@ public class SpellingBee {
         }
     }
 
-    // TODO: For each word in words, use binary search to see if it is in the dictionary.
-    //  If it is not in the dictionary, remove it from words.
+    // Checks if each of the words in words are in dictionary
     public void checkWords() {
         // YOUR CODE HERE
+        for (int i = 0; i < words.size(); i++)
+        {
+            if(!search(words.get(i))) {
+                words.remove(i);
+                i--;
+            }
+
+        }
+
+    }
+
+    //Checks if a string is in the dictionary through binary search
+    public boolean search(String target){
+        return searchHelp(target, 0, DICTIONARY_SIZE);
+    }
+
+    public boolean searchHelp(String target, int low, int high){
+        int mid = (low + high) / 2;
+
+        if (DICTIONARY[mid].equals(target))
+            return true;
+        if (high <= low)
+        {
+            return false;
+        }
+        else if (DICTIONARY[mid].compareTo(target) > 0)
+            return searchHelp(target, low, mid - 1);
+        else
+            return searchHelp(target, mid + 1, high);
+
     }
 
     // Prints all valid words to wordList.txt
